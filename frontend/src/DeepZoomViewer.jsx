@@ -6,7 +6,8 @@ import './DeepZoomViewer.css';
 const tileSources = [
   { name: 'deepzoom2', width: 120940, height: 87898 },
   { name: 'deepzoom3', width: 149233, height: 51097 },
-  { name: 'deepzoom4', width: 120742, height: 30124 }
+  { name: 'deepzoom4', width: 120742, height: 30124 },
+  { name: 'deepzoom5', width: 187024, height: 80181 }
 ].map(s => ({
   ...s,
   thumbnail: `/tiles/${s.name}_files/12/0_0.jpg`
