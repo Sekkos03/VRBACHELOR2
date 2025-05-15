@@ -56,29 +56,38 @@ export default function DeepZoomViewer() {
   // Initialize OpenSeadragon once with inline dzConfig + tuned render options
   useEffect(() => {
     if (viewerRef.current && !osdViewer.current) {
-      osdViewer.current = OpenSeadragon({
-        element:       viewerRef.current,
-        prefixUrl:     '/openseadragon/images/',
-        tileSources:   buildDzConfig(selected),
+     osdViewer.current = OpenSeadragon({
+  element:       viewerRef.current,
+  prefixUrl:     '/openseadragon/images/',
+  tileSources:   buildDzConfig(selected),
 
-        // Navigator
-        showNavigator:      true,
-        navigatorSizeRatio: 0.2,
-        navigatorPosition:  'TOP_RIGHT',
+  // force down your render resolution to 1× device pixels
+  // (Quest defaults to something like 1.5–2× which doubles/triples your workload)
+  pixelRatio:    1,
 
-        // 🔥 Performance tuning
-        immediateRender:    true,    // draw intermediate tiles instantly
-        renderWhilePanning: true,    // keep rendering during pan
-        blendTime:          0.1,     // quick fade between zoom levels
-        animationTime:      0.5,     // pan/zoom “fling” speed
-        maxZoomPixelRatio:  2,       // don’t oversample past 200%
-        visibilityRatio:    0.6,     // tile edge-buffer
-        constrainDuringPan: false,   // allow “free” panning feel
+  // navigator
+  showNavigator:      false,    // turn it off in VR to free up textures
 
-        // 🗃 Cache more tiles to avoid thrashing
-        maxImageCacheCount: 200,
-        minImageCacheCount: 50,
-      });
+  // throttle rendering passes
+  immediateRender:    false,    // wait until you have a full tile, don’t draw “in‐between” intermediates
+  renderWhilePanning: false,    // only render once the pan/gesture ends
+  blendTime:          0,        // no cross‐fade between levels
+  animationTime:      0.2,      // make zoom/pan snappier (so you don’t drag through a hundred frames)
+  
+  // avoid oversampling
+  maxZoomPixelRatio:  1,        // never load a tile at more than 100% of its native res
+
+  // load a tighter window around the viewport
+  visibilityRatio:    0.3,      // only grab tiles that are really on‐screen
+
+  // cache fewer tiles so you don’t thrash Quest memory
+  maxImageCacheCount:  50,
+  minImageCacheCount:  10,
+  
+  // keep the rest of your defaults
+  constrainDuringPan:  false,
+});
+
     }
 
     // Cleanup on unmount to free all GL resources
