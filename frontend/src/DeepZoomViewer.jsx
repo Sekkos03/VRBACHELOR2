@@ -14,90 +14,90 @@ const tileSources = [
 }));
 
 export default function DeepZoomViewer() {
-  const viewerRef = useRef(null);
+  const canvasRef = useRef(null);
   const osdViewer = useRef(null);
   const [selected, setSelected] = useState(tileSources[0]);
 
-  // Helper to build inline DeepZoom config
-  // ↓ Lowered tileSize from 4098 → 1024 for faster, smaller uploads
-  const buildDzConfig = ({
-    name,
-    width,
-    height,
-    tileSize = 4098,
-    overlap = 1,
-    format = 'jpg'
-  }) => ({
+  // Build DeepZoom config
+  const buildDzConfig = ({ name, width, height, tileSize = 4098, overlap = 1, format = 'jpg' }) => ({
     width,
     height,
     tileSize,
     tileOverlap: overlap,
     tileFormat: format,
     minLevel: 0,
-    getTileUrl: (level, x, y) =>
-      `/tiles/${name}_files/${level}/${x}_${y}.${format}`
+    getTileUrl: (level, x, y) => `/tiles/${name}_files/${level}/${x}_${y}.${format}`
   });
 
-  // (OPTIONAL) Remove this entire effect if you no longer need to
-  // forcibly free textures every frame—it was causing major slowdowns.
-  /*
+  // Initialize OpenSeadragon + WebGL + WebXR
   useEffect(() => {
-    if (OpenSeadragon?.WebGLDrawer) {
-      const WebGLDrawer = OpenSeadragon.WebGLDrawer;
-      const origDraw = WebGLDrawer.prototype.draw;
-      WebGLDrawer.prototype.draw = function() {
-        origDraw.apply(this, arguments);
-        // …texture/context cleanup…
-      };
+    const canvas = canvasRef.current;
+    if (!canvas || osdViewer.current) return;
+
+    // 1) Create high-performance WebGL2 context
+    const gl = canvas.getContext('webgl2', {
+      antialias:           false,
+      depth:               false,
+      stencil:             false,
+      alpha:               false,
+      powerPreference:     'high-performance',
+      preserveDrawingBuffer: false
+    });
+
+    // 2) Optionally initialize WebXR session with foveated layer
+    async function initXR() {
+      if (navigator.xr) {
+        try {
+          const session = await navigator.xr.requestSession('immersive-vr', {
+            optionalFeatures: ['local-floor', 'layers']
+          });
+
+          const xrLayer = new XRWebGLLayer(session, gl, {
+            antialias:      false,
+            foveationLevel: 2,   // 0 = off, 1 = low, 2 = medium, 3 = high
+            depthFormat:    'none'
+          });
+
+          await session.updateRenderState({ baseLayer: xrLayer });
+          if (gl.makeXRCompatible) await gl.makeXRCompatible();
+        } catch (e) {
+          console.warn('WebXR init failed:', e);
+        }
+      }
     }
-  }, []);
-  */
+    initXR();
 
-  // Initialize OpenSeadragon once with inline dzConfig + tuned render options
-  useEffect(() => {
-    if (viewerRef.current && !osdViewer.current) {
-      osdViewer.current = OpenSeadragon({
-        element:       viewerRef.current,
-        prefixUrl:     '/openseadragon/images/',
-        tileSources:   buildDzConfig(selected),
-        pixelRatio:    1,
-
-        // Navigator
+    // 3) Instantiate OpenSeadragon viewer on our canvas container
+    osdViewer.current = OpenSeadragon({
+      element:             canvas,
+      prefixUrl:           '/openseadragon/images/',
+      tileSources:         buildDzConfig(selected),
+      // Navigator
         showNavigator:      true,
         navigatorSizeRatio: 0.2,
         navigatorPosition:  'TOP_RIGHT',
 
-        // throttle rendering passes
-  immediateRender:    false,    // wait until you have a full tile, don’t draw “in‐between” intermediates
-  renderWhilePanning: false,    // only render once the pan/gesture ends
-  blendTime:          0,        // no cross‐fade between levels
-  animationTime:      0.2,      // make zoom/pan snappier (so you don’t drag through a hundred frames)
-  
-  // avoid oversampling
-  maxZoomPixelRatio:  1,        // never load a tile at more than 100% of its native res
+      // Performance tuning
+      pixelRatio:          1,
+      showNavigator:       false,
+      immediateRender:     false,
+      renderWhilePanning:  false,
+      blendTime:           0,
+      animationTime:       0.2,
+      maxZoomPixelRatio:   1,
+      visibilityRatio:     0.3,
+      constrainDuringPan:  false,
+      maxImageCacheCount:  50,
+      minImageCacheCount:  10
+    });
 
-  // load a tighter window around the viewport
-  visibilityRatio:    0.3,      // only grab tiles that are really on‐screen
-
-  // cache fewer tiles so you don’t thrash Quest memory
-  maxImageCacheCount:  50,
-  minImageCacheCount:  10,
-  
-  // keep the rest of your defaults
-  constrainDuringPan:  false,
-      });
-    }
-
-    // Cleanup on unmount to free all GL resources
     return () => {
-      if (osdViewer.current) {
-        osdViewer.current.destroy();
-        osdViewer.current = null;
-      }
+      osdViewer.current?.destroy();
+      osdViewer.current = null;
     };
   }, [selected]);
 
-  // When user clicks a thumbnail, just `.open()` the new source
+  // When tile source changes, update viewer
   useEffect(() => {
     if (osdViewer.current) {
       osdViewer.current.open(buildDzConfig(selected));
@@ -106,8 +106,8 @@ export default function DeepZoomViewer() {
 
   return (
     <div className="deepzoom-container">
-      {/* Main Deep Zoom panel */}
-      <div id="openseadragon1" ref={viewerRef} className="deepzoom-viewer" />
+      {/* Canvas for OpenSeadragon & WebGL/WebXR */}
+      <canvas ref={canvasRef} className="deepzoom-viewer" />
 
       {/* Thumbnails */}
       <div className="thumbnails">
@@ -141,3 +141,8 @@ export default function DeepZoomViewer() {
     </div>
   );
 }
+
+
+
+
+ 
