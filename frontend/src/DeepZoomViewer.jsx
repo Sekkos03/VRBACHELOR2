@@ -4,7 +4,6 @@ import './DeepZoomViewer.css';
 
 // Base sample identifiers and their sizes (in pixels).
 const tileSources = [
-  { name: 'deepzoom2', width: 120940, height: 87898 },
   { name: 'deepzoom3', width: 149233, height: 51097 },
   { name: 'deepzoom4', width: 120742, height: 30124 }
 ].map(s => ({
