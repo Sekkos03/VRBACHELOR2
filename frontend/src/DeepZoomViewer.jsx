@@ -24,7 +24,7 @@ export default function DeepZoomViewer() {
     name,
     width,
     height,
-    tileSize = 4098,
+    tileSize = 8194,
     overlap = 1,
     format = 'jpg'
   }) => ({
