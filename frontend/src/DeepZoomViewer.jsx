@@ -38,21 +38,6 @@ export default function DeepZoomViewer() {
       `/tiles/${name}_files/${level}/${x}_${y}.${format}`
   });
 
-  // (OPTIONAL) Remove this entire effect if you no longer need to
-  // forcibly free textures every frame—it was causing major slowdowns.
-  /*
-  useEffect(() => {
-    if (OpenSeadragon?.WebGLDrawer) {
-      const WebGLDrawer = OpenSeadragon.WebGLDrawer;
-      const origDraw = WebGLDrawer.prototype.draw;
-      WebGLDrawer.prototype.draw = function() {
-        origDraw.apply(this, arguments);
-        // …texture/context cleanup…
-      };
-    }
-  }, []);
-  */
-
   // Initialize OpenSeadragon once with inline dzConfig + tuned render options
   useEffect(() => {
     if (viewerRef.current && !osdViewer.current) {
@@ -66,7 +51,7 @@ export default function DeepZoomViewer() {
         navigatorSizeRatio: 0.2,
         navigatorPosition:  'TOP_RIGHT',
 
-        // 🔥 Performance tuning
+        // Performance tuning
         immediateRender:    true,    // draw intermediate tiles instantly
         renderWhilePanning: true,    // keep rendering during pan
         blendTime:          0.1,     // quick fade between zoom levels
@@ -75,7 +60,7 @@ export default function DeepZoomViewer() {
         visibilityRatio:    0.6,     // tile edge-buffer
         constrainDuringPan: false,   // allow “free” panning feel
 
-        // 🗃 Cache more tiles to avoid thrashing
+        // Cache more tiles to avoid thrashing
         maxImageCacheCount: 200,
         minImageCacheCount: 50,
       });
