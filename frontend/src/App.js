@@ -4,6 +4,7 @@ import DeepZoomViewer from './DeepZoomViewer';
 function App() {
   return (
     <div>
+      <p>test</p>
       <DeepZoomViewer />
     </div>
   );
