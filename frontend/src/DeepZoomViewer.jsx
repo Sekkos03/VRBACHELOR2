@@ -84,7 +84,7 @@ export default function DeepZoomViewer() {
 
   return (
     <div className="deepzoom-container">
-      <h1>Conteiner example</h1>
+      <h2>Conteiner example, TEST</h2>
       {/* Main Deep Zoom panel */}
       <div id="openseadragon1" ref={viewerRef} className="deepzoom-viewer" />
 
