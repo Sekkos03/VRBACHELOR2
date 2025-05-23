@@ -7,7 +7,6 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^13.5.0",
-    "fabric": "^6.6.5",
     "openseadragon": "^5.0.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
