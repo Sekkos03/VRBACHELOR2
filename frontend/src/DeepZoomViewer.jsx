@@ -118,16 +118,25 @@ export default function DeepZoomViewer() {
 
       {/* Thumbnails */}
       <div className="thumbnails">
-        {tileSources.map(source => (
-          <img
-            key={source.name}
-            src={source.thumbnail}
-            alt={source.name}
-            className={`thumb ${source.name === selected.name ? 'active' : ''}`}
-            onClick={() => setSelected(source)}
-          />
-        ))}
-      </div>
+  {tileSources.map(source => (
+    <div key={source.name} className="thumb-container">
+      <img
+        src={source.thumbnail}
+        alt={source.name}
+        className={`thumb ${source.name === selected.name ? 'active' : ''}`}
+        onClick={() => setSelected(source)}
+      />
+      <button
+        onClick={() => {
+          window.open(`/viewer/${source.name}`, '_blank', 'noopener,noreferrer');
+        }}
+        className="open-button"
+      >
+        🔍
+      </button>
+    </div>
+  ))}
+</div>
 
       {/* Patient Information Editor */}
       <div className="patient-info">
