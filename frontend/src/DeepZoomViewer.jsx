@@ -2,12 +2,48 @@ import React, { useEffect, useRef, useState } from 'react';
 import OpenSeadragon from 'openseadragon';
 import './DeepZoomViewer.css';
 
-// Base sample identifiers and their sizes (in pixels).
+// Define your image sources and associated patient info
 const tileSources = [
-  { name: 'deepzoom2', width: 120940, height: 87898 },
-  { name: 'deepzoom3', width: 149233, height: 51097 },
-  { name: 'deepzoom4', width: 120742, height: 30124 },
-  { name: 'deepzoom5', width: 187024, height: 80181 }
+  {
+    name: 'deepzoom2',
+    width: 120940,
+    height: 87898,
+    patient: {
+      name: 'John Doe',
+      id: 'P1234',
+      note: 'Suspicious lesion, upper right quadrant.'
+    }
+  },
+  {
+    name: 'deepzoom3',
+    width: 149233,
+    height: 51097,
+    patient: {
+      name: 'Jane Smith',
+      id: 'P5678',
+      note: 'Routine check. No irregularities found.'
+    }
+  },
+  {
+    name: 'deepzoom4',
+    width: 120742,
+    height: 30124,
+    patient: {
+      name: 'Alice Müller',
+      id: 'P9012',
+      note: 'Biopsy needed for lower region.'
+    }
+  },
+  {
+    name: 'deepzoom5',
+    width: 187024,
+    height: 80181,
+    patient: {
+      name: 'Bob Lee',
+      id: 'P3456',
+      note: 'Follow-up scheduled in 6 months.'
+    }
+  }
 ].map(s => ({
   ...s,
   thumbnail: `/tiles/${s.name}_files/12/0_0.jpg`
@@ -18,13 +54,11 @@ export default function DeepZoomViewer() {
   const osdViewer = useRef(null);
   const [selected, setSelected] = useState(tileSources[0]);
 
-  // Helper to build inline DeepZoom config
-  // ↓ Lowered tileSize from 4098 → 1024 for faster, smaller uploads
   const buildDzConfig = ({
     name,
     width,
     height,
-    tileSize = 4098,
+    tileSize = 1024,
     overlap = 1,
     format = 'jpg'
   }) => ({
@@ -38,44 +72,37 @@ export default function DeepZoomViewer() {
       `/tiles/${name}_files/${level}/${x}_${y}.${format}`
   });
 
-  // Initialize OpenSeadragon once with inline dzConfig + tuned render options
+  // Initialize viewer
   useEffect(() => {
     if (viewerRef.current && !osdViewer.current) {
       osdViewer.current = OpenSeadragon({
-        element:       viewerRef.current,
-        prefixUrl:     '/openseadragon/images/',
-        tileSources:   buildDzConfig(selected),
-
-        // Navigator
-        showNavigator:      true,
+        element: viewerRef.current,
+        prefixUrl: '/openseadragon/images/',
+        tileSources: buildDzConfig(selected),
+        showNavigator: true,
         navigatorSizeRatio: 0.2,
-        navigatorPosition:  'TOP_RIGHT',
-
-        // Performance tuning
-        immediateRender:    true,    // draw intermediate tiles instantly
-        renderWhilePanning: true,    // keep rendering during pan
-        blendTime:          0.1,     // quick fade between zoom levels
-        animationTime:      0.5,     // pan/zoom “fling” speed
-        maxZoomPixelRatio:  2,       // don’t oversample past 200%
-        visibilityRatio:    0.6,     // tile edge-buffer
-        constrainDuringPan: false,   // allow “free” panning feel
-
-        // Cache more tiles to avoid thrashing
+        navigatorPosition: 'TOP_RIGHT',
+        immediateRender: true,
+        renderWhilePanning: true,
+        blendTime: 0.1,
+        animationTime: 0.5,
+        maxZoomPixelRatio: 2,
+        visibilityRatio: 0.6,
+        constrainDuringPan: false,
         maxImageCacheCount: 200,
-        minImageCacheCount: 50,
+        minImageCacheCount: 50
       });
     }
 
-    // Cleanup on unmount to free all GL resources
     return () => {
       if (osdViewer.current) {
         osdViewer.current.destroy();
         osdViewer.current = null;
       }
     };
-  }, [selected]);
+  }, []);
 
-  // When user clicks a thumbnail, just `.open()` the new source
+  // Change source on selection
   useEffect(() => {
     if (osdViewer.current) {
       osdViewer.current.open(buildDzConfig(selected));
@@ -84,8 +111,9 @@ export default function DeepZoomViewer() {
 
   return (
     <div className="deepzoom-container">
-      <h2>Conteiner example, TEST</h2>
-      {/* Main Deep Zoom panel */}
+      <h2>Digital Pathology Viewer</h2>
+
+      {/* Deep Zoom viewer */}
       <div id="openseadragon1" ref={viewerRef} className="deepzoom-viewer" />
 
       {/* Thumbnails */}
@@ -101,10 +129,49 @@ export default function DeepZoomViewer() {
         ))}
       </div>
 
-      {/* Patient Information */}
+      {/* Patient Information Editor */}
       <div className="patient-info">
-        <h2>Patient Information</h2>
+        <h3>Patient Information</h3>
+        <label>
+          Name:
+          <input
+            type="text"
+            value={selected.patient.name}
+            onChange={e =>
+              setSelected({
+                ...selected,
+                patient: { ...selected.patient, name: e.target.value }
+              })
+            }
+          />
+        </label>
+        <label>
+          Patient ID:
+          <input
+            type="text"
+            value={selected.patient.id}
+            onChange={e =>
+              setSelected({
+                ...selected,
+                patient: { ...selected.patient, id: e.target.value }
+              })
+            }
+          />
+        </label>
+        <label>
+          Notes:
+          <textarea
+            value={selected.patient.note}
+            onChange={e =>
+              setSelected({
+                ...selected,
+                patient: { ...selected.patient, note: e.target.value }
+              })
+            }
+          />
+        </label>
         <div className="date">
+          Date:{" "}
           {new Date().toLocaleDateString('no-NO', {
             weekday: 'short',
             month: 'short',
@@ -112,10 +179,6 @@ export default function DeepZoomViewer() {
             year: 'numeric'
           })}
         </div>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-          incididunt ut labore et dolore magna aliqua.
-        </p>
       </div>
     </div>
   );

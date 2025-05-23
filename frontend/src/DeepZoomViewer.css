@@ -1,46 +1,59 @@
-/* DeepZoomViewer.css */
 .deepzoom-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  padding: 1rem;
+  font-family: sans-serif;
 }
 
 .deepzoom-viewer {
-  width: 800px;
+  width: 100%;
   height: 600px;
   border: 1px solid #ccc;
+  margin-bottom: 1rem;
 }
 
 .thumbnails {
   display: flex;
-  margin-top: 10px;
+  gap: 10px;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
 }
 
 .thumb {
-  width: 100px;
-  height: 75px;
-  margin: 0 5px;
-  border: 1px solid transparent;
-  cursor: pointer;
+  width: 120px;
+  height: 80px;
   object-fit: cover;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border 0.2s ease;
 }
 
 .thumb.active {
-  border-color: #0078d4;
+  border: 2px solid #007bff;
 }
 
 .patient-info {
-  margin-top: 20px;
-  width: 800px;
-  border: 1px solid #ccc;
-  padding: 10px;
-  position: relative;
+  max-width: 400px;
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.patient-info label {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.patient-info input,
+.patient-info textarea {
+  width: 100%;
+  padding: 0.4rem;
+  margin-top: 0.2rem;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  box-sizing: border-box;
 }
 
 .patient-info .date {
-  position: absolute;
-  top: 10px;
-  right: 20px;
-  font-size: 0.9em;
-  color: #666;
+  font-size: 0.9rem;
+  color: #555;
 }
