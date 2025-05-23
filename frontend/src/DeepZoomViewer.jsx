@@ -170,6 +170,9 @@ export default function DeepZoomViewer() {
             }
           />
         </label>
+        <button onClick={() => alert('Changes saved (illustration only)')} className="save-button">
+  💾 Save
+</button>
         <div className="date">
           Date:{" "}
           {new Date().toLocaleDateString('no-NO', {
