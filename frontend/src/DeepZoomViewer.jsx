@@ -43,6 +43,16 @@ const tileSources = [
       id: 'P3456',
       note: 'Follow-up scheduled in 6 months.'
     }
+  },
+  {
+    name: 'deepzoom6',
+    width: 35862,
+    height: 39819,
+    patient: {
+      name: 'New Patient',
+      id: 'P6789',
+      note: 'Initial scan under review.'
+    }
   }
 ].map(s => ({
   ...s,
@@ -118,25 +128,25 @@ export default function DeepZoomViewer() {
 
       {/* Thumbnails */}
       <div className="thumbnails">
-  {tileSources.map(source => (
-    <div key={source.name} className="thumb-container">
-      <img
-        src={source.thumbnail}
-        alt={source.name}
-        className={`thumb ${source.name === selected.name ? 'active' : ''}`}
-        onClick={() => setSelected(source)}
-      />
-      <button
-        onClick={() => {
-          window.open(`/viewer/${source.name}`, '_blank', 'noopener,noreferrer');
-        }}
-        className="open-button"
-      >
-        🔍
-      </button>
-    </div>
-  ))}
-</div>
+        {tileSources.map(source => (
+          <div key={source.name} className="thumb-container">
+            <img
+              src={source.thumbnail}
+              alt={source.name}
+              className={`thumb ${source.name === selected.name ? 'active' : ''}`}
+              onClick={() => setSelected(source)}
+            />
+            <button
+              onClick={() => {
+                window.open(`/viewer/${source.name}`, '_blank', 'noopener,noreferrer');
+              }}
+              className="open-button"
+            >
+              🔍
+            </button>
+          </div>
+        ))}
+      </div>
 
       {/* Patient Information Editor */}
       <div className="patient-info">
@@ -180,8 +190,8 @@ export default function DeepZoomViewer() {
           />
         </label>
         <button onClick={() => alert('Changes saved (illustration only)')} className="save-button">
-  💾 Save
-</button>
+          💾 Save
+        </button>
         <div className="date">
           Date:{" "}
           {new Date().toLocaleDateString('no-NO', {
