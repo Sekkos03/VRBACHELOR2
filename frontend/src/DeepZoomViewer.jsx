@@ -3,72 +3,56 @@ import OpenSeadragon from 'openseadragon';
 import './DeepZoomViewer.css';
 
 // Define your image sources and associated patient info
+// — note we now assign a `tileSize` per source
 const tileSources = [
   {
     name: 'deepzoom2',
-    width: 120940,
-    height: 87898,
-    patient: {
-      name: 'John Doe',
-      id: 'P1234',
-      note: 'Suspicious lesion, upper right quadrant.'
-    }
+    width: 120_940,
+    height: 87_898,
+    patient: { name: 'John Doe',    id: 'P1234', note: 'Suspicious lesion, upper right quadrant.' },
   },
   {
     name: 'deepzoom3',
-    width: 149233,
-    height: 51097,
-    patient: {
-      name: 'Jane Smith',
-      id: 'P5678',
-      note: 'Routine check. No irregularities found.'
-    }
+    width: 149_233,
+    height: 51_097,
+    patient: { name: 'Jane Smith',   id: 'P5678', note: 'Routine check. No irregularities found.' },
   },
   {
     name: 'deepzoom4',
-    width: 120742,
-    height: 30124,
-    patient: {
-      name: 'Alice Müller',
-      id: 'P9012',
-      note: 'Biopsy needed for lower region.'
-    }
+    width: 120_742,
+    height: 30_124,
+    patient: { name: 'Alice Müller', id: 'P9012', note: 'Biopsy needed for lower region.' },
   },
   {
     name: 'deepzoom5',
-    width: 187024,
-    height: 80181,
-    patient: {
-      name: 'Bob Lee',
-      id: 'P3456',
-      note: 'Follow-up scheduled in 6 months.'
-    }
+    width: 187_024,
+    height: 80_181,
+    patient: { name: 'Bob Lee',      id: 'P3456', note: 'Follow-up scheduled in 6 months.' },
   },
   {
     name: 'deepzoom6',
-    width: 35862,
-    height: 39819,
-    patient: {
-      name: 'New Patient',
-      id: 'P6789',
-      note: 'Initial scan under review.'
-    }
+    width: 35_862,
+    height: 39_819,
+    patient: { name: 'New Patient',  id: 'P6789', note: 'Initial scan under review.' },
   }
 ].map(s => ({
   ...s,
+  // dynamic tileSize: 4098 for dz2–5, 512 for dz6
+  tileSize: s.name === 'deepzoom6' ? 512 : 4098,
   thumbnail: `/tiles/${s.name}_files/12/0_0.jpg`
 }));
 
 export default function DeepZoomViewer() {
   const viewerRef = useRef(null);
-  const osdViewer = useRef(null);
+  const osdViewer  = useRef(null);
   const [selected, setSelected] = useState(tileSources[0]);
 
+  // buildDzConfig now pulls tileSize directly from the source object
   const buildDzConfig = ({
     name,
     width,
     height,
-    tileSize = 514,
+    tileSize,
     overlap = 1,
     format = 'jpg'
   }) => ({
@@ -112,7 +96,7 @@ export default function DeepZoomViewer() {
     };
   }, []);
 
-  // Change source on selection
+  // Swap out tileSource when user clicks a thumbnail
   useEffect(() => {
     if (osdViewer.current) {
       osdViewer.current.open(buildDzConfig(selected));
@@ -137,9 +121,7 @@ export default function DeepZoomViewer() {
               onClick={() => setSelected(source)}
             />
             <button
-              onClick={() => {
-                window.open(`/viewer/${source.name}`, '_blank', 'noopener,noreferrer');
-              }}
+              onClick={() => window.open(`/viewer/${source.name}`, '_blank', 'noopener,noreferrer')}
               className="open-button"
             >
               🔍
@@ -193,7 +175,7 @@ export default function DeepZoomViewer() {
           💾 Save
         </button>
         <div className="date">
-          Date:{" "}
+          Date:{' '}
           {new Date().toLocaleDateString('no-NO', {
             weekday: 'short',
             month: 'short',
